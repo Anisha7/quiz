@@ -5,6 +5,7 @@ package main
 import (
 	"bufio"
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -13,11 +14,21 @@ import (
 	"time"
 )
 
+var secs = flag.Int("s", 30, "seconds for quiz time")
+
 func main() {
+	flag.Parse()
 	file := "problems.csv"
 	// if different file given:
 	if len(os.Args) > 1 {
-		file = os.Args[1]
+		if strings.Contains(os.Args[1], ".csv") == true {
+			file = os.Args[1]
+		}
+	}
+	if len(os.Args) > 2 {
+		if strings.Contains(os.Args[2], ".csv") == true {
+			file = os.Args[1]
+		}
 	}
 
 	// open file
@@ -85,16 +96,21 @@ func timed(quiz map[string]string) {
 
 	// creating a channel
 	ch := make(chan string)
+
+	// time for quiz
+	maxTime := *secs
+	fmt.Printf("You have %d seconds to complete the quiz.", maxTime)
 	// press enter to start quiz
 	fmt.Println("Press Enter to Start:")
 	_, _ = readInput.ReadString('\n')
 	// start timer
 	// start := time.Now()
 	go getInput(readInput, ch, quiz, total, &score)
+
 	select {
 	case result := <-ch:
 		fmt.Println(result)
-	case <-time.After(time.Second * 30):
+	case <-time.After(time.Second * time.Duration(maxTime)):
 		fmt.Printf("\nResult: %d/%d\n", score, total)
 	}
 
