@@ -81,7 +81,7 @@ func getInput(readInput *bufio.Reader, c chan string, quiz map[string]string, to
 func timed(quiz map[string]string) {
 	readInput := bufio.NewReader(os.Stdin)
 	total := len(quiz) // how many total questions
-	var score *int64   // answers correct
+	var score int64    // answers correct
 
 	// creating a channel
 	ch := make(chan string)
@@ -90,15 +90,14 @@ func timed(quiz map[string]string) {
 	_, _ = readInput.ReadString('\n')
 	// start timer
 	// start := time.Now()
-	go getInput(readInput, ch, quiz, total, score)
+	go getInput(readInput, ch, quiz, total, &score)
 	select {
 	case result := <-ch:
 		fmt.Println(result)
 	case <-time.After(time.Second * 30):
-
+		fmt.Printf("\nResult: %d/%d\n", score, total)
 	}
 
-	fmt.Printf("Result: %d/%d\n", score, total)
 	return
 }
 
